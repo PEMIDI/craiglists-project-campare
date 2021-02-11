@@ -10,6 +10,10 @@ class StorageAbstract(ABC):
     def store(self, data, *args):
         pass
 
+    @abstractmethod
+    def load(self):
+        pass
+
 
 class MongoStorage(StorageAbstract):
 
@@ -23,6 +27,16 @@ class MongoStorage(StorageAbstract):
         else:
             collection.insert_one(data)
 
+    def load(self):
+        return self.mongo.database.advertisements_links.find({'flag': False})
+
+    def update_flag(self, data):
+        """"""
+        self.mongo.database.advertisements_links.find_one_and_update(
+            {'_id': data['_id']},
+            {'$set': {'flag': True}}
+        )
+
 
 class FileStorage(StorageAbstract):
 
@@ -31,3 +45,11 @@ class FileStorage(StorageAbstract):
         with open(f'fixtures/adv/{filename}.json', 'w') as f:
             f.write(json.dumps(data))
         print(f'fixtures/adv/{filename}.json')
+
+    def load(self):
+        with open('fixtures/adv/advertisements_links.json', 'r') as f:
+            links = json.loads(f.read())
+        return links
+
+    def update_flag(self):
+        pass
